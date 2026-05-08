@@ -319,6 +319,8 @@
     "output_name": "Display Id",
     "output_name_desc_unix": "During Sunshine startup, you should see the list of detected displays. Note: You need to use the id value inside the parenthesis. Below is an example; the actual output can be found in the Troubleshooting tab.",
     "output_name_desc_windows": "Manually specify a display device id to use for capture. If unset, the primary display is captured. Note: If you specified a GPU above, this display must be connected to that GPU. During Sunshine startup, you should see the list of detected displays. Below is an example; the actual output can be found in the Troubleshooting tab.",
+    "output_friendly_name": "Display Friendly Name",
+    "output_friendly_name_desc_windows": "Optionally specify a Windows display friendly name, such as VDD by MTT. Sunshine will keep output_name synchronized with the current device id for that friendly name and restart itself after a change.",
     "ping_timeout": "Ping Timeout",
     "ping_timeout_desc": "How long to wait in milliseconds for data from moonlight before shutting down the stream",
     "pkey": "Private Key",

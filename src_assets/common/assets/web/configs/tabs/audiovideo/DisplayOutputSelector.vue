@@ -10,9 +10,23 @@ const props = defineProps([
 
 const config = ref(props.config)
 const outputNamePlaceholder = (props.platform === 'windows') ? '{de9bb7e2-186e-505b-9e93-f48793333810}' : '0'
+const outputFriendlyNamePlaceholder = (props.platform === 'windows') ? 'VDD by MTT' : ''
 </script>
 
 <template>
+  <PlatformLayout :platform="platform">
+    <template #windows>
+      <div class="mb-3">
+        <label for="output_friendly_name" class="form-label">{{ $t('config.output_friendly_name') }}</label>
+        <input type="text" class="form-control" id="output_friendly_name" :placeholder="outputFriendlyNamePlaceholder"
+               v-model="config.output_friendly_name"/>
+        <div class="form-text">
+          {{ $t('config.output_friendly_name_desc_windows') }}
+        </div>
+      </div>
+    </template>
+  </PlatformLayout>
+
   <div class="mb-3">
     <label for="output_name" class="form-label">{{ $t('config.output_name') }}</label>
     <input type="text" class="form-control" id="output_name" :placeholder="outputNamePlaceholder"

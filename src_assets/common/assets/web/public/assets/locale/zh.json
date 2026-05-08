@@ -313,6 +313,8 @@
     "output_name": "显示器Id",
     "output_name_desc_unix": "在 Sunshine 启动过程中，您将看到检测到的显示器列表。注意：您需要使用括号内的 ID 值。",
     "output_name_desc_windows": "手动指定用于捕获的显示设备ID。如果未设置，则捕获主显示器。 注意：如果您在上面指定了GPU，则此显示设备必须连接到该GPU。在Sunshine启动时，您可在日志中查看已检测到的显示器列表。下方为示例，实际输出可在故障排除选项卡中找到。",
+    "output_friendly_name": "显示器友好名称",
+    "output_friendly_name_desc_windows": "可选填写 Windows 显示器友好名称，例如 VDD by MTT。Sunshine 会自动把 output_name 同步为该友好名称当前对应的设备 ID，并在发生变化后重启自身。",
     "ping_timeout": "Ping 超时",
     "ping_timeout_desc": "关闭串流前等待 Moonlight 数据的时间（以毫秒计）",
     "pkey": "私人密钥",

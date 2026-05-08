@@ -4,11 +4,13 @@
  */
 // standard includes
 #include <algorithm>
+#include <cctype>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <thread>
 #include <unordered_map>
 #include <utility>
@@ -510,6 +512,7 @@ namespace config {
     {},  // encoder
     {},  // adapter_name
     {},  // output_name
+    {},  // output_friendly_name
 
     {
       video_t::dd_t::config_option_e::disabled,  // configuration_option
@@ -1174,6 +1177,7 @@ namespace config {
     string_f(vars, "encoder", video.encoder);
     string_f(vars, "adapter_name", video.adapter_name);
     string_f(vars, "output_name", video.output_name);
+    string_f(vars, "output_friendly_name", video.output_friendly_name);
 
     generic_f(vars, "dd_configuration_option", video.dd.configuration_option, dd::config_option_from_view);
     generic_f(vars, "dd_resolution_option", video.dd.resolution_option, dd::resolution_option_from_view);
@@ -1402,6 +1406,79 @@ namespace config {
         std::cout << "Warning: Unrecognized configurable option ["sv << var << ']' << std::endl;
       }
     }
+  }
+
+  bool update_config_file_value(const std::string &name, const std::string &value) {
+    if (sunshine.config_file.empty()) {
+      BOOST_LOG(error) << "config: Unable to update '"sv << name << "' because the config file path is empty";
+      return false;
+    }
+
+    const auto trim = [](std::string_view input) {
+      while (!input.empty() && std::isspace(static_cast<unsigned char>(input.front()))) {
+        input.remove_prefix(1);
+      }
+      while (!input.empty() && std::isspace(static_cast<unsigned char>(input.back()))) {
+        input.remove_suffix(1);
+      }
+      return std::string {input};
+    };
+
+    const auto original {file_handler::read_file(sunshine.config_file.c_str())};
+    std::stringstream input {original};
+    std::string output;
+    std::string line;
+    bool found {false};
+
+    while (std::getline(input, line)) {
+      if (!line.empty() && line.back() == '\r') {
+        line.pop_back();
+      }
+
+      const auto comment_pos {line.find('#')};
+      const auto option_part {line.substr(0, comment_pos)};
+      const auto eq_pos {option_part.find('=')};
+
+      if (eq_pos != std::string::npos && trim(std::string_view {option_part}.substr(0, eq_pos)) == name) {
+        found = true;
+        if (!value.empty()) {
+          output += name;
+          output += " = ";
+          output += value;
+          if (comment_pos != std::string::npos) {
+            output += ' ';
+            output += line.substr(comment_pos);
+          }
+          output += '\n';
+        }
+        continue;
+      }
+
+      output += line;
+      output += '\n';
+    }
+
+    if (!found && !value.empty()) {
+      output += name;
+      output += " = ";
+      output += value;
+      output += '\n';
+    }
+
+    if (!found && value.empty()) {
+      return true;
+    }
+
+    if (output == original) {
+      return true;
+    }
+
+    if (file_handler::write_file(sunshine.config_file.c_str(), output)) {
+      BOOST_LOG(error) << "config: Failed to update '"sv << name << "' in " << sunshine.config_file;
+      return false;
+    }
+
+    return true;
   }
 
   int parse(int argc, char *argv[]) {

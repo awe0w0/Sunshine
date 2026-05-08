@@ -96,6 +96,7 @@ namespace config {
     std::string encoder;
     std::string adapter_name;
     std::string output_name;
+    std::string output_friendly_name;
 
     struct dd_t {
       struct workarounds_t {
@@ -286,4 +287,5 @@ namespace config {
 
   int parse(int argc, char *argv[]);
   std::unordered_map<std::string, std::string> parse_config(const std::string_view &file_content);
+  bool update_config_file_value(const std::string &name, const std::string &value);
 }  // namespace config

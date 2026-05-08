@@ -19,6 +19,24 @@
   <a href="https://codecov.io/gh/LizardByte/Sunshine"><img src="https://img.shields.io/codecov/c/gh/LizardByte/Sunshine?token=SMGXQ5NVMJ&style=for-the-badge&logo=codecov&label=codecov" alt="Codecov"></a>
 </div>
 
+## Fork Notice
+
+This repository is a personal fork of the upstream Sunshine project.
+
+- Original project: [LizardByte/Sunshine](https://github.com/LizardByte/Sunshine)
+- Original authors and maintainers: LizardByte and the Sunshine contributors
+- Upstream documentation: [Sunshine documentation](https://docs.lizardbyte.dev/projects/sunshine)
+
+### Changes In This Fork
+
+Compared with upstream Sunshine, this fork adds a Windows display friendly-name binding workflow for virtual displays:
+
+- Adds a new `output_friendly_name` configuration option next to `output_name` in the Audio/Video display output UI.
+- Resolves the configured Windows display friendly name, for example `VDD by MTT`, to Sunshine's current display device ID.
+- Keeps `output_name` synchronized with the resolved device ID, and clears `output_name` if the friendly name cannot be found.
+- Restarts Sunshine through the normal platform restart path after `output_name` changes, so the service can pick up the new display target.
+- Adds documentation and English/Chinese UI localization for the new option.
+
 ## ℹ️ About
 
 Sunshine is a self-hosted game stream host for Moonlight.

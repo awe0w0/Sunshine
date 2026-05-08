@@ -7,6 +7,8 @@
 // standard includes
 #include <filesystem>
 #include <memory>
+#include <optional>
+#include <string>
 
 // lib includes
 #include <display_device/types.h>
@@ -49,6 +51,13 @@ namespace display_device {
    * @examples_end
    */
   [[nodiscard]] std::string map_output_name(const std::string &output_name);
+
+  /**
+   * @brief Find the current Windows display device id by friendly name.
+   * @param friendly_name The display friendly name as shown in the enumerated devices log.
+   * @returns The matching device id, or std::nullopt if no current device matches.
+   */
+  [[nodiscard]] std::optional<std::string> find_device_id_by_friendly_name(const std::string &friendly_name);
 
   /**
    * @brief Configure the display device based on the user configuration and the session information.

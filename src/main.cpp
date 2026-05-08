@@ -22,6 +22,7 @@
 #include "logging.h"
 #include "main.h"
 #include "nvhttp.h"
+#include "platform/common.h"
 #include "process.h"
 #include "system_tray.h"
 #include "upnp.h"
@@ -118,6 +119,43 @@ void mainThreadLoop(const std::shared_ptr<safe::event_t<bool>> &shutdown_event) 
   BOOST_LOG(info) << "Starting main loop"sv;
   while (system_tray::process_tray_events() == 0);
   BOOST_LOG(info) << "Main loop has exited"sv;
+}
+
+std::thread startOutputFriendlyNameMonitor(const std::shared_ptr<safe::event_t<bool>> &shutdown_event) {
+  if (config::video.output_friendly_name.empty()) {
+    return {};
+  }
+
+  return std::thread {[shutdown_event]() {
+    platf::set_thread_name("output_friendly_name");
+
+    while (!shutdown_event->peek()) {
+      const auto resolved_device_id {display_device::find_device_id_by_friendly_name(config::video.output_friendly_name)};
+      const std::string next_output_name {resolved_device_id.value_or(""s)};
+
+      if (next_output_name != config::video.output_name) {
+        if (resolved_device_id) {
+          BOOST_LOG(info) << "Display friendly name '"sv << config::video.output_friendly_name
+                          << "' resolved to device id '" << next_output_name
+                          << "'. Updating output_name and restarting Sunshine."sv;
+        } else {
+          BOOST_LOG(warning) << "Display friendly name '"sv << config::video.output_friendly_name
+                             << "' was not found. Clearing output_name and restarting Sunshine."sv;
+        }
+
+        if (config::update_config_file_value("output_name", next_output_name)) {
+          config::video.output_name = next_output_name;
+          platf::restart();
+          return;
+        }
+
+        BOOST_LOG(error) << "Failed to update output_name for display friendly name '"sv
+                         << config::video.output_friendly_name << "'. Will retry."sv;
+      }
+
+      shutdown_event->view(5s);
+    }
+  }};
 }
 
 int main(int argc, char *argv[]) {
@@ -393,6 +431,8 @@ int main(int argc, char *argv[]) {
   std::thread configThread {confighttp::start};
   std::thread rtspThread {rtsp_stream::start};
 
+  auto output_friendly_name_thread = startOutputFriendlyNameMonitor(shutdown_event);
+
 #ifdef _WIN32
   // If we're using the default port and GameStream is enabled, warn the user
   if (config::sunshine.port == 47989 && is_gamestream_enabled()) {
@@ -416,6 +456,10 @@ int main(int argc, char *argv[]) {
   }
 
   mainThreadLoop(shutdown_event);
+
+  if (output_friendly_name_thread.joinable()) {
+    output_friendly_name_thread.join();
+  }
 
   httpThread.join();
   configThread.join();

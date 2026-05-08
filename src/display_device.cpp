@@ -6,6 +6,7 @@
 #include "display_device.h"
 
 // lib includes
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <display_device/audio_context_interface.h>
 #include <display_device/file_settings_persistence.h>
@@ -754,6 +755,26 @@ namespace display_device {
 
     return DD_DATA.sm_instance->execute([&output_name](auto &settings_iface) {
       return settings_iface.getDisplayName(output_name);
+    });
+  }
+
+  std::optional<std::string> find_device_id_by_friendly_name(const std::string &friendly_name) {
+    std::lock_guard lock {DD_DATA.mutex};
+    if (!DD_DATA.sm_instance || friendly_name.empty()) {
+      return std::nullopt;
+    }
+
+    return DD_DATA.sm_instance->execute([&friendly_name](auto &settings_iface) -> std::optional<std::string> {
+      const auto devices {settings_iface.enumAvailableDevices()};
+      const auto matching_device {std::ranges::find_if(devices, [&friendly_name](const auto &device) {
+        return boost::iequals(device.m_friendly_name, friendly_name);
+      })};
+
+      if (matching_device == std::end(devices)) {
+        return std::nullopt;
+      }
+
+      return matching_device->m_device_id;
     });
   }
 

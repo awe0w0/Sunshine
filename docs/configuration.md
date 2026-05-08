@@ -1041,6 +1041,35 @@ editing the `conf` file in a text editor. Use the examples as reference.
     </tr>
 </table>
 
+### output_friendly_name
+
+<table>
+    <tr>
+        <td>Description</td>
+        <td colspan="2">
+            Select a Windows display by friendly name and let Sunshine keep @code{}output_name@endcode in sync
+            with the current device id. This is useful for virtual display drivers whose device id can change
+            after the driver is reinstalled or restarted.
+            <br>
+            <br>
+            If the friendly name is found, Sunshine writes the matching @code{}device_id@endcode to
+            @code{}output_name@endcode and restarts itself so the new capture target is used. If the friendly
+            name is not found, Sunshine clears @code{}output_name@endcode and restarts itself.
+            @note{Applies to Windows only.}
+        </td>
+    </tr>
+    <tr>
+        <td>Default</td>
+        <td colspan="2">Disabled.</td>
+    </tr>
+    <tr>
+        <td>Example (Windows)</td>
+        <td colspan="2">@code{}
+            output_friendly_name = VDD by MTT
+            @endcode</td>
+    </tr>
+</table>
+
 ### dd_configuration_option
 
 <table>
